@@ -24,6 +24,7 @@
         public function setUsuId($usuId): void {
             $this->usuId = $usuId;
         }
+        
         public function setUsuLogin($usuLogin): void {
             $this->usuLogin = $usuLogin;
         }
@@ -48,11 +49,8 @@
                 
                 $row = $results[0];
                 
-                $this->setUsuId($row['u_id']);
-                $this->setUsuLogin($row['u_user']);
-                $this->setUsuSenha($row['u_password']);
-                $this->setDataCadas(new DateTime($row['dataCad']));
-                
+                $this->setData($row);
+
             }
         }
         
@@ -85,11 +83,8 @@
                 
                 $row = $results[0];
                 //var_dump($row);
+                $this->setData($row);
                 
-                $this->setUsuId($row['u_id']);
-                $this->setUsuLogin($row['u_user']);
-                $this->setUsuSenha($row['u_password']);
-                $this->setDataCadas(new DateTime($row['dataCad']));
                
             } else {
                 //throw new Exception("Login e/ou senha inválidos."); 
@@ -98,7 +93,47 @@
             
                       
         }
+        
+        public function setData($data) {
+            
+                $this->setUsuId($data['u_id']);
+                $this->setUsuLogin($data['u_user']);
+                $this->setUsuSenha($data['u_password']);
+                $this->setDataCadas(new DateTime($data['dataCad']));
+        }
+        
+        public function insert() {
+            $sql = new Sql();
+            $rawQuery = "CALL sp_usuarios_insert(:LOGIN, :PASSWORD)";
+            $params = array(":LOGIN" => $this->getUsuLogin(), ":PASSWORD" => $this->getUsuSenha(),);
+            $results = $sql->select($rawQuery, $params);
+            
+            //var_dump($results);
+            
+            if (count($results) > 0) {
+                $this->setData($results[0]);
+            }
+        }
+        
+        public function __construct($login = "", $password = ""){
 
+            $this->setUsuLogin($login);
+            $this->setUsuSenha($password);
+
+        }
+        
+        public function update($user, $password) {
+            
+            $this->setUsuLogin($user);
+            $this->setUsuSenha($password);
+            
+            $sql = new Sql();
+            $rawQuery = "UPDATE usuarios SET u_user = :LOGIN, u_password = :PASSWORD WHERE u_id = :ID;";
+            $params = array(":LOGIN"=> $this->getUsuLogin(), ":PASSWORD"=> $this->getUsuSenha(), ":ID"=> $this->getUsuId());
+            $sql->query($rawQuery, $params);
+            
+        }
+        
         public function __toString() {
             return json_encode(array(
                 "u_id" => $this->getUsuId(),
