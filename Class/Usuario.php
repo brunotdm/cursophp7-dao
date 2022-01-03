@@ -134,6 +134,18 @@
             
         }
         
+        public function delete() {
+            $sql = new Sql();
+            $rawQuery = "DELETE * FROM usuarios WHERE :ID = u_id;";
+            $params = array(":ID" => $this->getUsuId());
+            $sql->query($rawQuery, $params);
+            
+            $this->setUsuId(0);
+            $this->setUsuLogin("");
+            $this->setUsuSenha("");
+            $this->setDataCadas(new DateTime());
+        }
+        
         public function __toString() {
             return json_encode(array(
                 "u_id" => $this->getUsuId(),
